@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
@@ -10,23 +11,28 @@ public class Enemy : MonoBehaviour
 
     public RuntimeAnimatorController[] animCon;
     public Rigidbody2D target;
+   
 
     bool isLive;
 
     Animator anim;
     Rigidbody2D rigid;
+    Collider2D coll;
     SpriteRenderer spriter;
+    WaitForFixedUpdate wait; //다음 픽스드 업데이트까지 기다림
     void Awake()
     {
        rigid = GetComponent<Rigidbody2D>();
         spriter = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
+        wait = new WaitForFixedUpdate();
+        coll= GetComponent<Collider2D>();
     }
 
     
     void FixedUpdate()
     {
-        if (!isLive)
+        if (!isLive || anim.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
             return;
         Vector2 dirVec = target.position - rigid.position;
         Vector2 nextVec= dirVec.normalized* speed*Time.fixedDeltaTime;
@@ -44,6 +50,10 @@ public class Enemy : MonoBehaviour
         target = GameManager.instance.player.GetComponent<Rigidbody2D>();
         isLive = true;
         health = maxHealth;
+        coll.enabled = true;
+        rigid.simulated = true;
+        spriter.sortingOrder = 2;
+        anim.SetBool("Dead", false);
     }
 
     public void Init(SpawnData data)
@@ -56,21 +66,37 @@ public class Enemy : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!collision.CompareTag("Bullet"))
+        if (!collision.CompareTag("Bullet") ||!isLive)
             return;
         health -= collision.GetComponent<Bullet>().damage;
-
+        StartCoroutine(KnockBack());
         if(health >0)
         {
-            //살아있으니 뎀지
+            anim.SetTrigger("Hit");
         }
         else
         {
             //사망
-            Dead();
+            isLive = false;
+            coll.enabled = false;
+            rigid.simulated = false;
+            spriter.sortingOrder = 1;
+            anim.SetBool("Dead", true);
+            GameManager.instance.kill++;
+            GameManager.instance.GetExp();
+            //Dead(); 이건 애니메이터한테 맡긴다
         }
     }
 
+
+    IEnumerator KnockBack()
+    {
+
+        yield return wait; //다음 하나의 물리프레임까지 기다리는 딜레이
+        Vector3 playerPos = GameManager.instance.player.transform.position;
+        Vector3 dirVec = transform.position - playerPos;
+        rigid.AddForce(dirVec.normalized * 3, ForceMode2D.Impulse);
+    }
     void Dead()
     {
         gameObject.SetActive(false);

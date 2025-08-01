@@ -10,6 +10,13 @@ public class Weapon : MonoBehaviour
     public int count;
     public float speed;
 
+    float timer;
+    Player player;
+
+    private void Awake()
+    {
+        player = GetComponentInParent<Player>();
+    }
     private void Start()
     {
         
@@ -22,7 +29,15 @@ public class Weapon : MonoBehaviour
             case 0:
                 transform.Rotate(Vector3.forward * speed*Time.deltaTime);
                 break;
+           
             default:
+                timer += Time.deltaTime;
+
+                if(timer>speed)
+                {
+                    timer = 0;
+                    Fire();
+                }
                 break;
 
 
@@ -30,7 +45,9 @@ public class Weapon : MonoBehaviour
 
         //test
         if (Input.GetButtonDown("Jump"))
-            Levelup(20, 5);
+            Levelup(10, 1);
+
+        
     }
 
     public void Levelup(float damage, int count)
@@ -51,7 +68,10 @@ public class Weapon : MonoBehaviour
                 speed = -150;
                 Batch();
                 break;
+
+            
             default:
+                speed = 0.3f;
                 break;
 
         
@@ -82,7 +102,23 @@ public class Weapon : MonoBehaviour
             bullet.Rotate(rotVec);
             bullet.Translate(bullet.up * 1.5f, Space.World);
 
-            bullet.GetComponent<Bullet>().Init(damage, -1); //-1 is infinity per;
+            bullet.GetComponent<Bullet>().Init(damage, -1, Vector3.zero); //-1 is infinity per;
         }
     }
+
+    void Fire()
+    {
+        if (!player.scanner.nearestTarget)
+            return;
+
+        Vector3 targetPos = player.scanner.nearestTarget.position;
+        Vector3 dir = targetPos - transform.position;
+        dir=dir.normalized;
+        Transform bullet = GameManager.instance.pool.Get(prefabId).transform;
+        bullet.position = transform.position;
+        bullet.rotation = Quaternion.FromToRotation(Vector3.up, dir); //√‡ , ∏Ò«•
+        bullet.GetComponent<Bullet>().Init(damage, count, dir);
+    }
+    
+    
 }
