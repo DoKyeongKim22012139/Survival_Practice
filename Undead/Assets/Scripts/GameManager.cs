@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
     public float maxGameTIme=2*10f;
 
     [Header("#Play info")]
+    public int health;
+    public int maxHealth = 100;
     public int level;
     public int kill;
     public int exp;
@@ -26,6 +28,10 @@ public class GameManager : MonoBehaviour
         instance = this;
     }
 
+    private void Start()
+    {
+        health = maxHealth;
+    }
     void Update()
     {
 
