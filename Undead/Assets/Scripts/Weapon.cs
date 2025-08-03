@@ -133,6 +133,9 @@ public class Weapon : MonoBehaviour
         bullet.rotation = Quaternion.FromToRotation(Vector3.up, dir); //√‡ , ∏Ò«•
         bullet.GetComponent<Bullet>().Init(damage, count, dir);
     }
-    
-    
+
+    void OnDisable()
+    {
+        Debug.LogWarning("Weapon has been disabled: " + name);
+    }
 }

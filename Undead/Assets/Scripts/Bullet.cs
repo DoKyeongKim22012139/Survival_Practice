@@ -16,7 +16,7 @@ public class Bullet : MonoBehaviour
     }
     private void Update()
     {
-        Dead();
+        //Dead();
     }
     public void Init(float damage,int per,Vector3 dir)
     {
