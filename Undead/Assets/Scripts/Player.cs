@@ -8,9 +8,9 @@ public class Player : MonoBehaviour
 {
     public Vector2 inputVec;
     public float speed;
-
+    
     public Scanner scanner;
-
+    public Hand[] hands;
 
     Rigidbody2D rigid;
     SpriteRenderer spirter;
@@ -23,6 +23,7 @@ public class Player : MonoBehaviour
         spirter = GetComponent<SpriteRenderer>();
         anime = GetComponent<Animator>();
         scanner=GetComponent<Scanner>();
+        hands= GetComponentsInChildren<Hand>(true); //비활성화 된것도 포함 true
     }
 
 
@@ -35,6 +36,8 @@ public class Player : MonoBehaviour
     
     void FixedUpdate()
     {
+        if (!GameManager.instance.isLive)
+            return;
         //위치 제어
         Vector2 nextVec = inputVec*speed*Time.fixedDeltaTime;
         rigid.MovePosition(rigid.position+nextVec);
@@ -43,6 +46,8 @@ public class Player : MonoBehaviour
 
     void LateUpdate()
     {
+        if (!GameManager.instance.isLive)
+            return;
         anime.SetFloat("Speed", inputVec.magnitude);
 
         if(inputVec.x !=0)

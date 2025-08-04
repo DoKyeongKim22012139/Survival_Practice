@@ -20,6 +20,9 @@ public class Weapon : MonoBehaviour
     
     void Update()
     {
+        if (!GameManager.instance.isLive)
+            return;
+
         switch (id)
         {
             case 0:
@@ -90,6 +93,12 @@ public class Weapon : MonoBehaviour
 
         
         }
+
+        //Hand Set
+        Hand hand = player.hands[(int)data.itemType];
+        hand.spriter.sprite = data.hand;
+        hand.gameObject.SetActive(true); 
+
         player.BroadcastMessage("ApplyGear",SendMessageOptions.DontRequireReceiver);
     }
 
@@ -134,8 +143,5 @@ public class Weapon : MonoBehaviour
         bullet.GetComponent<Bullet>().Init(damage, count, dir);
     }
 
-    void OnDisable()
-    {
-        Debug.LogWarning("Weapon has been disabled: " + name);
-    }
+
 }
