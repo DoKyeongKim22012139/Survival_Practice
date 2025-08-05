@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     
     public Scanner scanner;
     public Hand[] hands;
+    public RuntimeAnimatorController[] animCon;
 
     Rigidbody2D rigid;
     SpriteRenderer spirter;
@@ -27,13 +28,14 @@ public class Player : MonoBehaviour
     }
 
 
-    void Start()
+    private void OnEnable()
     {
-        
+        speed*=Character.Speed;
+        anime.runtimeAnimatorController = animCon[GameManager.instance.playerId];
     }
 
     // Update is called once per frame
-    
+
     void FixedUpdate()
     {
         if (!GameManager.instance.isLive)
@@ -59,5 +61,26 @@ public class Player : MonoBehaviour
     void OnMove(InputValue value)
     {
         inputVec = value.Get<Vector2>();
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (!GameManager.instance.isLive)
+            return;
+        GameManager.instance.health -= Time.deltaTime * 10;
+
+
+
+
+        if(GameManager.instance.health <0)
+        {
+            for(int i=2;i<transform.childCount;i++)
+            {
+                transform.GetChild(i).gameObject.SetActive(false);
+            }
+            anime.SetTrigger("Dead");
+            GameManager.instance.GameOver();
+        }
+
     }
 }
