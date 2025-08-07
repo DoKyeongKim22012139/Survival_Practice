@@ -14,16 +14,13 @@ public class Bullet : MonoBehaviour
         
         rigid = GetComponent<Rigidbody2D>();
     }
-    private void Update()
-    {
-        //Dead();
-    }
+    
     public void Init(float damage,int per,Vector3 dir)
     {
         this.damage = damage;
         this.per = per; 
 
-        if(per >-1)
+        if(per >=0)
         {
             rigid.velocity = dir*15f;
         }
@@ -31,26 +28,24 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!collision.CompareTag("Enemy") || per ==-1)
+        if (!collision.CompareTag("Enemy") || per ==-100)
             return;
 
         per--;
-        if(per == -1)
+        if(per <0 )
         {
             rigid.velocity = Vector2.zero;
             gameObject.SetActive(false);
         }
     }
-    void Dead()
+
+
+
+
+    private void OnTriggerExit2D(Collider2D collision)
     {
-        Transform target = GameManager.instance.transform;
-        Vector3 centerPos = target.position;   
-        float dir = Vector3.Distance(centerPos,transform.position);
-        if (dir>20)
-        {
-            this.gameObject.SetActive(false);
-        }
-
-
+        if (!collision.CompareTag("Area") || per == -100)
+            return;
+        gameObject.SetActive(false);    
     }
 }
